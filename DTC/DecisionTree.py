@@ -2806,31 +2806,44 @@ class DecisionTree(object):
 			answer['solution_path'].append(node.get_serial_num())
 		return answer
 
-	def classify_by_asking_questions(self, root_node):
+	def classify_by_asking_questions(self, root_node, data={}):
 		'''
 		If you want classification to be carried out by engaging a human user in a
 		question-answer session, this is the method to use for that purpose.  See the
 		script classify_by_asking_questions.py in the Examples subdirectory for an
 		illustration of how to do that.
 		'''
-		answer = {class_name: None for class_name in self._class_names}
-		answer['solution_path'] = []
-		scratchpad_for_numeric_answers = {feature: None
-		                                  for feature in self._prob_distribution_numeric_features_dict}
-		classification = self.interactive_recursive_descent_for_classification(root_node,
-		                                                                       answer, scratchpad_for_numeric_answers)
-		classification['solution_path'].reverse()
-		classification_for_display = {}
-		for item in classification:
-			if isinstance(classification[item], float):
-				classification_for_display[item] = "%0.3f" % classification[item]
-			else:
-				classification_for_display[item] = ["NODE" + str(x) for x in classification[item]]
-		return classification_for_display
+		if data == {}:
+			answer = {class_name: None for class_name in self._class_names}
+			scratchpad_for_numeric_answers = {feature: None
+			                                  for feature in self._prob_distribution_numeric_features_dict}
+			answer['solution_path'] = []
+			data['__stop'] = False
+			data['step'] = 1  # 1= get node feature details; 0 = process given answer
+			data['toAsk'] = {}
+			data['a'] = answer
+			data['s'] = scratchpad_for_numeric_answers
+		else:
+		# answer = data['a']
+		# scratchpad_for_numeric_answers = data['s']
+		data = self.interactive_recursive_descent_for_classification(root_node, data=data)
+		# classification['solution_path'].reverse()
 
-	def interactive_recursive_descent_for_classification(self, node, answer, scratchpad_for_numerics):
+		# classification_for_display = {}
+		# for item in classification:
+		# 	if isinstance(classification[item], float):
+		# 		classification_for_display[item] = "%0.3f" % classification[item]
+		# 	else:
+		# 		classification_for_display[item] = ["NODE" + str(x) for x in classification[item]]
+		# return classification_for_display
+		return data
+
+	def interactive_recursive_descent_for_classification(self, node, answer={}, scratchpad_for_numerics={}, data={}):
 		pattern1 = r'(.+)<(.+)'
 		pattern2 = r'(.+)>(.+)'
+		if data != {}:
+			answer = data['a']
+			scratchpad_for_numerics = data['s']
 		user_value_for_feature = None
 		children = node.get_children()
 		if len(children) == 0:
@@ -2838,6 +2851,7 @@ class DecisionTree(object):
 			for i in range(len(self._class_names)):
 				answer[self._class_names[i]] = leaf_node_class_probabilities[i]
 			answer['solution_path'].append(node.get_serial_num())
+			answer['__stop'] = True
 			return answer
 		list_of_branch_attributes_to_children = []
 		for child in children:
@@ -2852,79 +2866,103 @@ class DecisionTree(object):
 				user_value_for_feature = scratchpad_for_numerics[feature_tested_at_node]
 			else:
 				valuerange = self._numeric_features_valuerange_dict[feature_tested_at_node]
-				while True:
-					if sys.version_info[0] == 3:
-						user_value_for_feature = input("\nWhat is the value for the feature '" +
-						                               feature_tested_at_node + "'?" + "\n" +
-						                               "Enter a value in the range: " + str(valuerange) + " => ")
-					else:
-						user_value_for_feature = raw_input("\nWhat is the value for the feature '" +
-						                                   feature_tested_at_node + "'?" + "\n" +
-						                                   "Enter a value in the range: " + str(valuerange) + " => ")
-					user_value_for_feature = convert(user_value_for_feature.strip())
-					answer_found = 0
-					if valuerange[0] <= user_value_for_feature <= valuerange[1]:
-						answer_found = 1
-						break
-					if answer_found == 1: break
-					print("You entered illegal value. Let's try again")
-				scratchpad_for_numerics[feature_tested_at_node] = user_value_for_feature
+				if data['step'] == 1:
+					data['toAsk'] = {'feature': feature_tested_at_node, 'valueRange': valuerange}
+					return data
+				# while True:
+				# if sys.version_info[0] == 3:
+				# 	user_value_for_feature = input("\nWhat is the value for the feature '" +
+				# 	                               feature_tested_at_node + "'?" + "\n" +
+				# 	                               "Enter a value in the range: " + str(valuerange) + " => ")
+				# else:
+				# 	user_value_for_feature = raw_input("\nWhat is the value for the feature '" +
+				# 	                                   feature_tested_at_node + "'?" + "\n" +
+				# 	                                   "Enter a value in the range: " + str(valuerange) + " => ")
+				#  user_value_for_feature = convert(user_value_for_feature.strip())
+				# answer_found = 0
+				# if valuerange[0] <= user_value_for_feature <= valuerange[1]:
+				# 	answer_found = 1
+				# 	break
+				# if answer_found == 1: break
+				# print("You entered illegal value. Let's try again")
+				# break
+				# scratchpad_for_numerics[feature_tested_at_node] = user_value_for_feature
 			for i in range(len(list_of_branch_attributes_to_children)):
 				branch_attribute = list_of_branch_attributes_to_children[i]
 				if re.search(pattern1, branch_attribute):
 					m = re.search(pattern1, branch_attribute)
 					feature, threshold = m.group(1), m.group(2)
 					if user_value_for_feature <= float(threshold):
-						answer = self.interactive_recursive_descent_for_classification(children[i],
-						                                                               answer, scratchpad_for_numerics)
 						path_found = True
 						answer['solution_path'].append(node.get_serial_num())
+						data['a'] = answer
+						data['nextNode'] = children[i]
+						# answer = self.interactive_recursive_descent_for_classification(children[i],
+						#                                                                answer, scratchpad_for_numerics)
+						# path_found = True
+						# answer['solution_path'].append(node.get_serial_num())
 						break
 				if re.search(pattern2, branch_attribute):
 					m = re.search(pattern2, branch_attribute)
 					feature, threshold = m.group(1), m.group(2)
 					if user_value_for_feature > float(threshold):
-						answer = self.interactive_recursive_descent_for_classification(children[i],
-						                                                               answer, scratchpad_for_numerics)
+						path_found = True
 						answer['solution_path'].append(node.get_serial_num())
+						data['a'] = answer
+						data['nextNode'] = children[i]
+						# path_found = True
+						# answer = self.interactive_recursive_descent_for_classification(children[i],
+						#                                                                answer, scratchpad_for_numerics)
+						# answer['solution_path'].append(node.get_serial_num())
 						break
 			if path_found: return answer
 		else:
-			possible_values_for_feature = self._features_and_unique_values_dict[feature_tested_at_node]
-			while True:
-				if sys.version_info[0] == 3:
-					user_value_for_feature = \
-						input("\nWhat is the value for the feature '" + feature_tested_at_node +
-						      "'?" + "\n" + "Enter one of: " + str(possible_values_for_feature) + " => ")
-				else:
-					user_value_for_feature = \
-						raw_input("\nWhat is the value for the feature '" + feature_tested_at_node +
-						          "'?" + "\n" + "Enter one of: " + str(possible_values_for_feature) + " => ")
-				user_value_for_feature = convert(user_value_for_feature.strip())
-				answer_found = 0
-				for value in possible_values_for_feature:
-					if value == user_value_for_feature:
-						answer_found = 1
-						break
-				if answer_found == 1: break
-				print("You entered illegal value. Let's try again")
+			if data['step'] == 1:
+				possible_values_for_feature = self._features_and_unique_values_dict[feature_tested_at_node]
+				data['toAsk'] = {'feature': feature_tested_at_node, 'possibleAnswer': possible_values_for_feature}
+				return data
+			elif data['step'] == 0:
+				user_value_for_feature = data['toAsk']['givenAnswer']
+			# possible_values_for_feature = self._features_and_unique_values_dict[feature_tested_at_node]
+			# while True:
+			# 	if sys.version_info[0] == 3:
+			# 		user_value_for_feature = \
+			# 			input("\nWhat is the value for the feature '" + feature_tested_at_node +
+			# 			      "'?" + "\n" + "Enter one of: " + str(possible_values_for_feature) + " => ")
+			# 	else:
+			# 		user_value_for_feature = \
+			# 			raw_input("\nWhat is the value for the feature '" + feature_tested_at_node +
+			# 			          "'?" + "\n" + "Enter one of: " + str(possible_values_for_feature) + " => ")
+			# 	user_value_for_feature = convert(user_value_for_feature.strip())
+			# 	answer_found = 0
+			# 	for value in possible_values_for_feature:
+			# 		if value == user_value_for_feature:
+			# 			answer_found = 1
+			# 			break
+			# 	if answer_found == 1: break
+			# 	print("You entered illegal value. Let's try again")
 			feature_value_combo = "".join([feature_tested_at_node, "=", str(user_value_for_feature)])
 			for i in range(len(list_of_branch_attributes_to_children)):
 				branch_attribute = list_of_branch_attributes_to_children[i]
 				if branch_attribute == feature_value_combo:
-					answer = self.interactive_recursive_descent_for_classification(children[i],
-					                                                               answer, scratchpad_for_numerics)
 					path_found = True
 					answer['solution_path'].append(node.get_serial_num())
+					data['a'] = answer
+					data['nextNode'] = children[i]
+					# answer['solution_path'].append(node.get_serial_num())
+					# data = self.interactive_recursive_descent_for_classification(children[i], answer, scratchpad_for_numerics)
+					# path_found = True
 					break
-			if path_found: return answer
+			if path_found: return data
 		if not path_found:
 			leaf_node_class_probabilities = node.get_class_probabilities()
 			for i in range(0, len(self._class_names)):
 				answer[self._class_names[i]] = leaf_node_class_probabilities[i]
 			answer['solution_path'].append(node.get_serial_num())
+			answer['__stop'] = True
+			data['a'] = answer
 
-		return answer
+		return data
 
 	##-------------------------------  Construct Decision Tree  ------------------------------------
 
