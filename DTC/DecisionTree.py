@@ -2823,7 +2823,7 @@ class DecisionTree(object):
 			data['toAsk'] = {}
 			data['a'] = answer
 			data['s'] = scratchpad_for_numeric_answers
-		else:
+		# else:
 		# answer = data['a']
 		# scratchpad_for_numeric_answers = data['s']
 		data = self.interactive_recursive_descent_for_classification(root_node, data=data)
@@ -2844,6 +2844,7 @@ class DecisionTree(object):
 		if data != {}:
 			answer = data['a']
 			scratchpad_for_numerics = data['s']
+		data['actualNode'] = node
 		user_value_for_feature = None
 		children = node.get_children()
 		if len(children) == 0:
@@ -2851,8 +2852,9 @@ class DecisionTree(object):
 			for i in range(len(self._class_names)):
 				answer[self._class_names[i]] = leaf_node_class_probabilities[i]
 			answer['solution_path'].append(node.get_serial_num())
-			answer['__stop'] = True
-			return answer
+			data['__stop'] = True
+			data['a'] = answer
+			return data
 		list_of_branch_attributes_to_children = []
 		for child in children:
 			branch_features_and_values = child.get_branch_features_and_values_or_thresholds()
@@ -2864,6 +2866,7 @@ class DecisionTree(object):
 		if feature_tested_at_node in self._prob_distribution_numeric_features_dict:
 			if scratchpad_for_numerics[feature_tested_at_node]:
 				user_value_for_feature = scratchpad_for_numerics[feature_tested_at_node]
+				del data['toAsk']['valueRange']
 			else:
 				valuerange = self._numeric_features_valuerange_dict[feature_tested_at_node]
 				if data['step'] == 1:
@@ -2897,6 +2900,8 @@ class DecisionTree(object):
 						answer['solution_path'].append(node.get_serial_num())
 						data['a'] = answer
 						data['nextNode'] = children[i]
+						data['step'] = 1
+						data = self.interactive_recursive_descent_for_classification(data['nextNode'], data=data)
 						# answer = self.interactive_recursive_descent_for_classification(children[i],
 						#                                                                answer, scratchpad_for_numerics)
 						# path_found = True
@@ -2910,6 +2915,8 @@ class DecisionTree(object):
 						answer['solution_path'].append(node.get_serial_num())
 						data['a'] = answer
 						data['nextNode'] = children[i]
+						data['step'] = 1
+						data = self.interactive_recursive_descent_for_classification(data['nextNode'], data=data)
 						# path_found = True
 						# answer = self.interactive_recursive_descent_for_classification(children[i],
 						#                                                                answer, scratchpad_for_numerics)
@@ -2923,6 +2930,7 @@ class DecisionTree(object):
 				return data
 			elif data['step'] == 0:
 				user_value_for_feature = data['toAsk']['givenAnswer']
+				del data['toAsk']['possibleAnswer']
 			# possible_values_for_feature = self._features_and_unique_values_dict[feature_tested_at_node]
 			# while True:
 			# 	if sys.version_info[0] == 3:
@@ -2949,6 +2957,8 @@ class DecisionTree(object):
 					answer['solution_path'].append(node.get_serial_num())
 					data['a'] = answer
 					data['nextNode'] = children[i]
+					data['step'] = 1
+					data = self.interactive_recursive_descent_for_classification(data['nextNode'], data=data)
 					# answer['solution_path'].append(node.get_serial_num())
 					# data = self.interactive_recursive_descent_for_classification(children[i], answer, scratchpad_for_numerics)
 					# path_found = True
@@ -2959,7 +2969,7 @@ class DecisionTree(object):
 			for i in range(0, len(self._class_names)):
 				answer[self._class_names[i]] = leaf_node_class_probabilities[i]
 			answer['solution_path'].append(node.get_serial_num())
-			answer['__stop'] = True
+			data['__stop'] = True
 			data['a'] = answer
 
 		return data
