@@ -26,7 +26,14 @@ def start(bot, update):
 
 
 def help(bot, update):
-	bot.send_message(chat_id=update.message.chat_id, text="Help is still in developing....")
+	message = "Ciao, ecco la lista dei miei comandi\n /exploretree  Inizia ad esplorare gli alberi"
+	bot.send_message(chat_id=update.message.chat_id, text=message)
+
+
+def tbd(bot, update, chat_data):
+	message = "Questo funzionalità è ancora in sviluppo!"
+	update.message.reply_text(chat_id=update.message.chat_id, text=message)
+	return CHOOSINGTREE
 
 
 def settings(bot, update):
@@ -38,7 +45,8 @@ def settings(bot, update):
 
 
 def unknown(bot, update):
-	bot.send_message(chat_id=update.message.chat_id, text="Sorry, I didn't understand that command.")
+	bot.send_message(chat_id=update.message.chat_id,
+	                 text="Perdona, ma non ho capito il comando.\n /help per avere maggiori info sui comandi disponibili")
 
 
 def startInteraction(bot, update, chat_data):
@@ -59,8 +67,8 @@ def cancel(bot, update, chat_data):
 	return ConversationHandler.END
 
 
-def InteractAnimals(bool, update, chat_data):
-	# Retrive the data dictionary for tree interaction
+def InteractAnimals(bot, update, chat_data):
+	# Retrieve the data dictionary for tree interaction
 	if 'Animals' in chat_data:
 		data = chat_data['Animals']
 	else:
@@ -114,8 +122,28 @@ def InteractAnimals(bool, update, chat_data):
 			del chat_data['Animals'], data
 			return ConversationHandler.END
 	logger.info("Ho finito, ho trovato una o più classi")
+	message = "Ottimo! Ho trovato qualcosa!"
+	classification = data['a']
+	del classification['solution_path']
+	which_classes = list(classification.keys())
+	which_classes = sorted(which_classes, key=lambda x: classification[x], reverse=True)
+	if classification[which_classes[0]] < 1:
+		message += "\n\nEcco la probabilità delle risposte, io sceglierei la prima ;)\n"
+		message += "\n     " + str.ljust("Classe", 30) + "Probabilità"
+		message += "\n     ----------                    -----------"
+		for which_class in which_classes:
+			if which_class is not 'solution_path' and classification[which_class] > 0:
+				message += "\n     " + str.ljust(which_class, 30) + str(round(classification[which_class], 2))
+	else:
+		message += "\n\nSai cosa?, sono quasi sicuro che la risposta corretta sia" + str(which_classes[0])
+
+	message += "\nCosa vuoi fare?"
+	reply_keyboard = [['Ricomincia', 'Esci'], ['Valuta la classificazione']]
+	update.message.reply_text(message, reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=False))
+
+
 	del chat_data['Animals'], data
-	return ConversationHandler.END
+	return CHOOSINGTREE
 
 
 def main():
@@ -139,7 +167,9 @@ def main():
 		states={
 			INTERACT: [  # RegexHandler('^(Animals)$', InteractAnimals, pass_chat_data=True),
 				MessageHandler(Filters.text, InteractAnimals, pass_chat_data=True)],
-			CHOOSINGTREE: [CommandHandler('exploretree', startInteraction)]
+			CHOOSINGTREE: [RegexHandler('^(Ricomincia)$', startInteraction, pass_chat_data=True),
+			               RegexHandler('^(Esci)$', cancel, pass_chat_data=True),
+			               RegexHandler('^(Valuta la classificazione)$', tbd, pass_chat_data=True)]
 		},
 
 		fallbacks=[CommandHandler('cancel', cancel, pass_chat_data=True),

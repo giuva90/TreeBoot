@@ -2963,7 +2963,8 @@ class DecisionTree(object):
 					# data = self.interactive_recursive_descent_for_classification(children[i], answer, scratchpad_for_numerics)
 					# path_found = True
 					break
-			if path_found: return data
+			if path_found:
+				return data
 		if not path_found:
 			leaf_node_class_probabilities = node.get_class_probabilities()
 			for i in range(0, len(self._class_names)):

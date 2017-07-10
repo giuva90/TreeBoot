@@ -23,7 +23,7 @@ def init():
 	dt = DecisionTree(training_datafile=training_datafile,
 	                  csv_class_column_index=18,
 	                  csv_columns_for_features=[2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17],
-	                  entropy_threshold=0.0001,
+	                  entropy_threshold=0.00001,
 	                  max_depth_desired=50,
 	                  # debug1 = 1,
 	                  # debug2 = 1,
