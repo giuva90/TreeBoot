@@ -1,3 +1,6 @@
+#!/usr/bin/python
+# -*- coding: iso-8859-1 -*-
+
 from config import Telegram_BOTID
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, RegexHandler, ConversationHandler
 from telegram import (ReplyKeyboardMarkup, ReplyKeyboardRemove)
@@ -31,7 +34,7 @@ def help(bot, update):
 
 
 def tbd(bot, update, chat_data):
-	message = "Questo funzionalitÃ  Ã¨ ancora in sviluppo!"
+	message = "Questo funzionalità è ancora in sviluppo!"
 	update.message.reply_text(chat_id=update.message.chat_id, text=message)
 	return CHOOSINGTREE
 
@@ -121,15 +124,15 @@ def InteractAnimals(bot, update, chat_data):
 			logger.critical("Sono finito in uno stato morto...")
 			del chat_data['Animals'], data
 			return ConversationHandler.END
-	logger.info("Ho finito, ho trovato una o piÃ¹ classi")
+	logger.info("Ho finito, ho trovato una o più classi")
 	message = "Ottimo! Ho trovato qualcosa!"
 	classification = data['a']
 	del classification['solution_path']
 	which_classes = list(classification.keys())
 	which_classes = sorted(which_classes, key=lambda x: classification[x], reverse=True)
 	if classification[which_classes[0]] < 1:
-		message += "\n\nEcco la probabilitÃ  delle risposte, io sceglierei la prima ;)\n"
-		message += "\n     " + str.ljust("Classe", 30) + "ProbabilitÃ "
+		message += "\n\nEcco la probabilità delle risposte, io sceglierei la prima ;)\n"
+		message += "\n     " + str.ljust("Classe", 30) + "Probabilità"
 		message += "\n     ----------                    -----------"
 		for which_class in which_classes:
 			if which_class is not 'solution_path' and classification[which_class] > 0:

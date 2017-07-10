@@ -1,3 +1,6 @@
+#!/usr/bin/python
+# -*- coding: iso-8859-1 -*-
+
 from telegram import (ReplyKeyboardMarkup, ReplyKeyboardRemove)
 from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters, RegexHandler,
                           ConversationHandler)

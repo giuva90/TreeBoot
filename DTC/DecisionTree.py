@@ -1,3 +1,6 @@
+#!/usr/bin/python
+# -*- coding: iso-8859-1 -*-
+
 __version__ = '3.4.3'
 __author__ = "Avinash Kak (kak@purdue.edu)"
 __date__ = '2016-May-14'
