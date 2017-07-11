@@ -17,7 +17,7 @@ logging.basicConfig(filename=LOG_FILENAME, format='%(asctime)s - %(name)s - %(le
 logger = logging.getLogger(__name__)
 
 
-# logger.addHandler(logging.handlers.RotatingFileHandler(LOG_FILENAME, maxBytes=20, backupCount=5))
+# logger.addHandler(logging.handlers.RotatingFileHandler(LOG_FILENAME, maxBytes=2000, backupCount=5))
 
 
 def error(bot, update, error):
@@ -35,7 +35,7 @@ def help(bot, update):
 
 def tbd(bot, update, chat_data):
 	message = "Questo funzionalità è ancora in sviluppo!"
-	update.message.reply_text(chat_id=update.message.chat_id, text=message)
+	update.message.reply_text(chat_id=update.message.chat_id, text=message, reply_markup=ReplyKeyboardRemove())
 	return CHOOSINGTREE
 
 
@@ -49,7 +49,7 @@ def settings(bot, update):
 
 def unknown(bot, update):
 	bot.send_message(chat_id=update.message.chat_id,
-	                 text="Perdona, ma non ho capito il comando.\n /help per avere maggiori info sui comandi disponibili")
+	                 text="Perdona, ma non ho capito il comando.\n /help per avere maggiori info sui comandi disponibili", )
 
 
 def startInteraction(bot, update, chat_data):
@@ -138,7 +138,7 @@ def InteractAnimals(bot, update, chat_data):
 			if which_class is not 'solution_path' and classification[which_class] > 0:
 				message += "\n     " + str.ljust(which_class, 30) + str(round(classification[which_class], 2))
 	else:
-		message += "\n\nSai cosa?, sono quasi sicuro che la risposta corretta sia" + str(which_classes[0])
+		message += "\n\nSai cosa?, sono quasi sicuro che la risposta corretta sia " + str(which_classes[0])
 
 	message += "\nCosa vuoi fare?"
 	reply_keyboard = [['Ricomincia', 'Esci'], ['Valuta la classificazione']]
@@ -151,10 +151,11 @@ def InteractAnimals(bot, update, chat_data):
 
 def main():
 	logging.info("Start training tree")
-	data = init()
+	data = init("zoo_1.csv", 18, [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17])
 	treeData['dtAnimals'] = data['dt']
 	del data['dt']
 	treeData['Animals'] = data
+	data['actualNode'].display_decision_tree("   ")
 	logging.info("End training tree")
 	logging.info("Bot Started!")
 	updater = Updater(token=Telegram_BOTID)

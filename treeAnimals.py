@@ -15,16 +15,18 @@ def convert(value):
 		return value
 
 
-training_datafile = "InputData" + sep + "zoo_1.csv"
-questions_datafile = "InputData" + sep + "zoo_1_questions.csv"
+# training_datafile = "InputData" + sep + "zoo_1.csv"
+# questions_datafile = "InputData" + sep + "zoo_1_interaction.csv"
 
 
-def init():
+def init(dsname: str, csv_class_column_index: int, csv_columns_for_features: list):
+	training_datafile = "InputData" + sep + dsname
+	questions_datafile = training_datafile[:-4] + "_interaction.csv"
 	dt = DecisionTree(training_datafile=training_datafile,
-	                  csv_class_column_index=18,
-	                  csv_columns_for_features=[2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17],
+	                  csv_class_column_index=csv_class_column_index,
+	                  csv_columns_for_features=csv_columns_for_features,
 	                  entropy_threshold=0.00001,
-	                  max_depth_desired=50,
+	                  max_depth_desired=25,
 	                  # debug1 = 1,
 	                  # debug2 = 1,
 	                  # debug3 = 1,
@@ -40,8 +42,16 @@ def init():
 
 	with open(questions_datafile, 'r') as csv_file:
 		rows = reader(csv_file, delimiter=',')
+		r = []
 		for row in rows:
-			data['questions'][row[0]] = row[1]
+			r.append(row)
+		numbers = r[0]
+		del r[0]
+		nQuestions = int(numbers[0])
+
+		for i in range(nQuestions - 1):
+			if r[i][0][0] == '#': continue
+			data['questions'][r[i][0]] = r[i][1]
 	data['dt'] = dt
 	return data
 

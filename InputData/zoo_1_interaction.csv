@@ -1,0 +1,43 @@
+16,15,7
+# Lista delle domande per le feature
+Hair,Questo animale è peloso?
+Feathers,Questo animale ha le piume?
+Eggs,Fa le uova?
+Milk,Fa il latte?
+Airborne,E' fatto per volare?
+Aquatic,E' acquatico?
+Predator,E' un predatore?
+Thoothed,Ha i denti?
+Beckbone,Ha una spina dorsale?
+Breathes,Respira?
+Venomus,E' per caso velenoso?
+Fins,Ha le pinne?
+Legs,Quante gambe ha?
+Tail,Ha la coda?
+Domestic,e' domestico?
+Catsize,Ha le dimensioni di un gatto?
+# Risposte (Caso in cui il dataset non contiene i dati in formato testuale)
+Hair,Si,No
+Feathers,Si,No
+Eggs,Si,No
+Milk,Si,No
+Airborne,Si,No
+Aquatic,Si,No
+Predator,Si,No
+Thoothed,Si,No
+Beckbone,Si,No
+Breathes,Si,No
+Venomus,Si,No
+Fins,Si,No
+Tail,Si,No
+Domestic,Si,No
+Catsize,Si,No
+#Class name uman readable
+1,aardvark; antelope; bear; boar; buffalo; calf;cavy; cheetah; deer; dolphin; elephant; fruitbat; giraffe; girl; goat; gorilla; hamster; hare; leopard; lion; lynx; mink; mole; mongoose; opossum; oryx; platypus; polecat; pony; porpoise; puma; pussycat; raccoon; reindeer; seal; sealion; squirrel; vampire; vole; wallaby;wolf
+2,chicken; crow; dove; duck; flamingo; gull; hawk; kiwi; lark; ostrich; parakeet; penguin; pheasant; rhea; skimmer; skua; sparrow; swan; vulture; wren
+3,pitviper; seasnake; slowworm; tortoise; tuatara
+4,bass; carp; catfish; chub; dogfish; haddock; herring; pike; piranha; seahorse; sole; stingray; tuna
+5,frog; frog; newt; toad
+6,flea; gnat; honeybee; housefly; ladybird; moth; termite; wasp
+7,clam; crab; crayfish; lobster; octopus; scorpion; seawasp; slug; starfish; worm
+#
