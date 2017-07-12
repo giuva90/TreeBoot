@@ -15,9 +15,7 @@ treeData = {}
 logging.basicConfig(filename=LOG_FILENAME, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.DEBUG)
 logger = logging.getLogger(__name__)
-
-
-# logger.addHandler(logging.handlers.RotatingFileHandler(LOG_FILENAME, maxBytes=2000, backupCount=5))
+logger.addHandler(logging.handlers.RotatingFileHandler(LOG_FILENAME, maxBytes=2000, backupCount=5))
 
 
 def error(bot, update, error):
@@ -25,7 +23,12 @@ def error(bot, update, error):
 
 
 def start(bot, update):
-	bot.send_message(chat_id=update.message.chat_id, text="Welcome!! I'm still in developing....")
+	message = "Ciao, e benvenuto!"
+	message += "\nSono ancora in sviluppo, ecco la lista dei comandi attualmente disponibili:" \
+	           "\n/exploretree  Inizia ad esplorare gli alberi" \
+	           "\n/help mostra la lista dei comandi disponibili"
+
+	bot.send_message(chat_id=update.message.chat_id, text=message)
 
 
 def help(bot, update):
@@ -85,6 +88,9 @@ def InteractAnimals(bot, update, chat_data):
 		print("while")
 		if data['step'] == 1:
 			if 'valueRange' in toAsk:
+				if chat_data['step']:
+					question = data['questions'][toAsk['feature']] + "Range: " + str(toAsk['valueRange'])
+					update.message.reply_text(question, reply_markup=ReplyKeyboardRemove())
 				# Se la featuere ha valore numerico compreso in un intervallo:
 				user_value_for_feature = input(
 					"\nWhat is the value for the feature '" + toAsk['feature'] + "'?" + "\n" +
@@ -100,9 +106,9 @@ def InteractAnimals(bot, update, chat_data):
 			elif 'possibleAnswer' in toAsk:
 				# se la feature ha valore simbolico
 				if chat_data['step']:
-					print(toAsk['possibleAnswer'])
+					# print(toAsk['possibleAnswer'])
 					reply_keyboard = [[str(x) for x in toAsk['possibleAnswer']]]
-					print(reply_keyboard)
+					# print(reply_keyboard)
 					update.message.reply_text(data['questions'][toAsk['feature']],
 					                          reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
 					chat_data['step'] = 0
@@ -155,7 +161,7 @@ def main():
 	treeData['dtAnimals'] = data['dt']
 	del data['dt']
 	treeData['Animals'] = data
-	data['actualNode'].display_decision_tree("   ")
+	# data['actualNode'].display_decision_tree("   ")
 	logging.info("End training tree")
 	logging.info("Bot Started!")
 	updater = Updater(token=Telegram_BOTID)
