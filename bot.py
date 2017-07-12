@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: iso-8859-1 -*-
 
-from config import Telegram_BOTID, AdminPassword
+import configparser
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, RegexHandler, ConversationHandler
 from telegram import (ReplyKeyboardMarkup, ReplyKeyboardRemove)
 from copy import deepcopy
@@ -9,6 +9,11 @@ import logging
 import logging.handlers
 from treeAnimals import init, convert
 
+config = configparser.ConfigParser()
+config.read('config.ini')
+config.sections()
+Telegram_BOTID = config['TOKENS']['telegram_botid']
+AdminPassword = config['TOKENS']['admin_password']
 
 CHOOSINGTREE, INTERACT = range(2)
 LOG_FILENAME = 'logs.log'
