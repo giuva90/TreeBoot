@@ -1,40 +1,54 @@
-from telegram import (ReplyKeyboardMarkup, ReplyKeyboardRemove)
+#!/usr/bin/python
+# -*- coding: iso-8859-1 -*-
+from bot import CHOOSINGTREE, logger, ConversationHandler, ReplyKeyboardRemove
+from requests import get
 
 
-def start(bot, update):
-	bot.send_message(chat_id=update.message.chat_id, text="Welcome!! I'm still in developing....")
+def error(bot, update, error):
+	logger.error('Update "%s" caused error "%s"' % (update, error))
+
+
+def imAdmin(bot, update, chat_data):
+	chat_data['isAdmin'] = True
+	bot.send_message(chat_id=update.message.chat_id,
+	                 text="Questa chat è stata marchiata come isAdmin (almeno fino al riavvio del bot)")
+
+
+def getServerInfo(bot, update, chat_data):
+	if 'isAdmin' in chat_data:
+		nmyIP = get('http://ipinfo.io/ip').text
+		message = "IP: " + nmyIP
+	else:
+		message = "Hey Giovane, mi sa che mi stai chiedendo troppo...."
+	bot.send_message(chat_id=update.message.chat_id, text=message)
+
 
 
 def help(bot, update):
-	bot.send_message(chat_id=update.message.chat_id, text="Help is still in developing....")
+	message = "Ciao, ecco la lista dei miei comandi\n /exploretree  Inizia ad esplorare gli alberi"
+	bot.send_message(chat_id=update.message.chat_id, text=message)
+
+
+def tbd(bot, update, chat_data):
+	message = "Questo funzionalità è ancora in sviluppo!"
+	update.message.reply_text(chat_id=update.message.chat_id, text=message, reply_markup=ReplyKeyboardRemove())
+	return CHOOSINGTREE
 
 
 def settings(bot, update):
+
 	bot.send_message(chat_id=update.message.chat_id, text="For the moment I do not have any settings :)")
 
-
-def echo(bot, update):
-	bot.send_message(chat_id=update.message.chat_id, text="You said \n" + update.message.text)
-
-
 def unknown(bot, update):
-	bot.send_message(chat_id=update.message.chat_id, text="Sorry, I didn't understand that command.")
+	bot.send_message(chat_id=update.message.chat_id,
+	                 text="Perdona, ma non ho capito il comando.\n /help per avere maggiori info sui comandi disponibili", )
 
 
-def startInteraction(bot, update):
-	reply_keyboard = [['Animals', '/cancel']]
-	update.message.reply_text('Ciao, scegli cosa vuoi che indovini.\n\n /cancel se vuoi terminare! ',
-	                          reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
-	return INTERACT
-
-
-def cancel(bot, update):
+def cancel(bot, update, chat_data):
 	user = update.message.from_user
-	logger.info("User %s canceled the conversation." % user.first_name)
+	logger.info("User %s canceled the conversation." % user.name)
 	update.message.reply_text('Ciao, spero di rivederti presto!',
 	                          reply_markup=ReplyKeyboardRemove())
-	return ConversationHandler.END
-
-
-def interact(bool, update, chat_data):
+	if 'Animals' in chat_data:
+		del chat_data['Animals']
 	return ConversationHandler.END

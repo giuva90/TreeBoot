@@ -1,13 +1,14 @@
 #!/usr/bin/python
 # -*- coding: iso-8859-1 -*-
 
-from config import Telegram_BOTID
+from config import Telegram_BOTID, AdminPassword
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, RegexHandler, ConversationHandler
 from telegram import (ReplyKeyboardMarkup, ReplyKeyboardRemove)
 from copy import deepcopy
 import logging
 import logging.handlers
 from treeAnimals import init, convert
+
 
 CHOOSINGTREE, INTERACT = range(2)
 LOG_FILENAME = 'logs.log'
@@ -17,10 +18,7 @@ logging.basicConfig(filename=LOG_FILENAME, format='%(asctime)s - %(name)s - %(le
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.handlers.RotatingFileHandler(LOG_FILENAME, maxBytes=2000, backupCount=5))
 
-
-def error(bot, update, error):
-	logger.error('Update "%s" caused error "%s"' % (update, error))
-
+from botFunctions import *
 
 def start(bot, update):
 	message = "Ciao, e benvenuto!"
@@ -31,46 +29,12 @@ def start(bot, update):
 	bot.send_message(chat_id=update.message.chat_id, text=message)
 
 
-def help(bot, update):
-	message = "Ciao, ecco la lista dei miei comandi\n /exploretree  Inizia ad esplorare gli alberi"
-	bot.send_message(chat_id=update.message.chat_id, text=message)
-
-
-def tbd(bot, update, chat_data):
-	message = "Questo funzionalità è ancora in sviluppo!"
-	update.message.reply_text(chat_id=update.message.chat_id, text=message, reply_markup=ReplyKeyboardRemove())
-	return CHOOSINGTREE
-
-
-def settings(bot, update):
-	bot.send_message(chat_id=update.message.chat_id, text="For the moment I do not have any settings :)")
-
-
-# def echo(bot, update):
-# 	bot.send_message(chat_id=update.message.chat_id, text="You said \n" + update.message.text)
-
-
-def unknown(bot, update):
-	bot.send_message(chat_id=update.message.chat_id,
-	                 text="Perdona, ma non ho capito il comando.\n /help per avere maggiori info sui comandi disponibili", )
-
-
 def startInteraction(bot, update, chat_data):
 	chat_data = {}
 	reply_keyboard = [['Animals', '/cancel']]
 	update.message.reply_text('Ciao, scegli cosa vuoi che indovini.\n\n /cancel se vuoi terminare! ',
 	                          reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
 	return INTERACT
-
-
-def cancel(bot, update, chat_data):
-	user = update.message.from_user
-	logger.warn("User %s canceled the conversation." % user.first_name)
-	update.message.reply_text('Ciao, spero di rivederti presto!',
-	                          reply_markup=ReplyKeyboardRemove())
-	if 'Animals' in chat_data:
-		del chat_data['Animals']
-	return ConversationHandler.END
 
 
 def InteractAnimals(bot, update, chat_data):
@@ -85,24 +49,23 @@ def InteractAnimals(bot, update, chat_data):
 
 	while not data['__stop']:
 		toAsk = data['toAsk']
-		print("while")
 		if data['step'] == 1:
 			if 'valueRange' in toAsk:
+				# Se la featuere ha valore numerico compreso in un intervallo:
 				if chat_data['step']:
 					question = data['questions'][toAsk['feature']] + "Range: " + str(toAsk['valueRange'])
 					update.message.reply_text(question, reply_markup=ReplyKeyboardRemove())
-				# Se la featuere ha valore numerico compreso in un intervallo:
-				user_value_for_feature = input(
-					"\nWhat is the value for the feature '" + toAsk['feature'] + "'?" + "\n" +
-					"Enter a value in the range: " + str(toAsk['valueRange']) + " => ")
-				user_value_for_feature = convert(user_value_for_feature.strip())
+					return INTERACT
+				else:
+					user_value_for_feature = convert(update.message.text.strip())
 				if toAsk['valueRange'][0] <= user_value_for_feature <= toAsk['valueRange'][1]:
 					data['step'] = 0
 					data['s'][toAsk['feature']] = user_value_for_feature
 					data = dt.classify_by_asking_questions(data['actualNode'], data)
 				else:
-					print("Value not valid!")
-					continue
+					question = data['questions'][toAsk['feature']] + "Range: " + str(toAsk['valueRange'])
+					update.message.reply_text(question, reply_markup=ReplyKeyboardRemove())
+					return INTERACT
 			elif 'possibleAnswer' in toAsk:
 				# se la feature ha valore simbolico
 				if chat_data['step']:
@@ -129,8 +92,11 @@ def InteractAnimals(bot, update, chat_data):
 		else:
 			logger.critical("Sono finito in uno stato morto...")
 			del chat_data['Animals'], data
+			update.message.reply_text(
+				"Perdona, mi sono rotto un braccio! devo scappare in ospedale :(\nTi lascio con mio fratello, ma devi ricominciare.",
+				reply_markup=ReplyKeyboardRemove())
 			return ConversationHandler.END
-	logger.info("Ho finito, ho trovato una o più classi")
+
 	message = "Ottimo! Ho trovato qualcosa!"
 	classification = data['a']
 	del classification['solution_path']
@@ -163,13 +129,15 @@ def main():
 	treeData['Animals'] = data
 	# data['actualNode'].display_decision_tree("   ")
 	logging.info("End training tree")
-	logging.info("Bot Started!")
+	logging.info("Bot Starting...!")
 	updater = Updater(token=Telegram_BOTID)
 	dispatcher = updater.dispatcher
 
 	startHandler = CommandHandler(command='start', callback=start)
 	helpHandler = CommandHandler(command='help', callback=help)
 	settingsHandler = CommandHandler(command='settings', callback=settings)
+	adminIdentify = CommandHandler(command=AdminPassword, callback=imAdmin, pass_chat_data=True)
+	serverInfo = CommandHandler(command='getIP', callback=getServerInfo, pass_chat_data=True)
 
 	conv_handler = ConversationHandler(
 		entry_points=[CommandHandler('exploretree', startInteraction, pass_chat_data=True)],
@@ -189,6 +157,8 @@ def main():
 	# echoHandler = MessageHandler(Filters.text, echo)
 	unknownCommandHandler = MessageHandler(Filters.command, unknown)
 
+	dispatcher.add_handler(adminIdentify)
+	dispatcher.add_handler(serverInfo)
 	dispatcher.add_handler(startHandler)
 	dispatcher.add_handler(helpHandler)
 	dispatcher.add_handler(settingsHandler)
@@ -198,6 +168,7 @@ def main():
 	dispatcher.add_handler(unknownCommandHandler)
 	dispatcher.add_error_handler(error)
 	updater.start_polling()
+	logging.info("Bot Started!")
 	print("Bot Started correctly!")
 	updater.idle()
 
