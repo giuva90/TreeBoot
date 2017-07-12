@@ -1,1 +1,0 @@
-Telegram_BOTID = '447466567:AAGomQKpgfraxoOb7l5EJE7UmIvSHWMoPwA'
