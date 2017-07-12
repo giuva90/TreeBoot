@@ -10,7 +10,7 @@ import logging.handlers
 from treeAnimals import init, convert
 
 config = configparser.ConfigParser()
-config.read('config.ini')
+config.read('configuration.ini')
 config.sections()
 Telegram_BOTID = config['TOKENS']['telegram_botid']
 AdminPassword = config['TOKENS']['admin_password']
