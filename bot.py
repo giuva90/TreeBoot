@@ -42,7 +42,7 @@ def startInteraction(bot, update, chat_data):
 	return INTERACT
 
 
-def InteractAnimals(bot, update, chat_data):
+def interactAnimals(bot, update, chat_data):
 	# Retrieve the data dictionary for tree interaction
 	if 'Animals' in chat_data:
 		data = chat_data['Animals']
@@ -148,8 +148,8 @@ def main():
 		entry_points=[CommandHandler('exploretree', startInteraction, pass_chat_data=True)],
 
 		states={
-			INTERACT: [  # RegexHandler('^(Animals)$', InteractAnimals, pass_chat_data=True),
-				MessageHandler(Filters.text, InteractAnimals, pass_chat_data=True)],
+			INTERACT: [  # RegexHandler('^(Animals)$', interactAnimals, pass_chat_data=True),
+				MessageHandler(Filters.text, interactAnimals, pass_chat_data=True)],
 			CHOOSINGTREE: [RegexHandler('^(Ricomincia)$', startInteraction, pass_chat_data=True),
 			               RegexHandler('^(Esci)$', cancel, pass_chat_data=True),
 			               RegexHandler('^(Valuta la classificazione)$', tbd, pass_chat_data=True)]
