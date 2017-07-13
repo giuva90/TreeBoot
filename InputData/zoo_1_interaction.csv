@@ -1,4 +1,5 @@
 16,15,7
+#!!!!!!!!!!!!!!!!!Do not insert comment before this row!!!!!!!!!!!!!!!!!
 # Lista delle domande per le feature
 Hair,Questo animale è peloso?
 Feathers,Questo animale ha le piume?
@@ -32,7 +33,7 @@ Fins,Si,No
 Tail,Si,No
 Domestic,Si,No
 Catsize,Si,No
-#Class name uman readable
+#Class name human readable
 1,aardvark; antelope; bear; boar; buffalo; calf;cavy; cheetah; deer; dolphin; elephant; fruitbat; giraffe; girl; goat; gorilla; hamster; hare; leopard; lion; lynx; mink; mole; mongoose; opossum; oryx; platypus; polecat; pony; porpoise; puma; pussycat; raccoon; reindeer; seal; sealion; squirrel; vampire; vole; wallaby;wolf
 2,chicken; crow; dove; duck; flamingo; gull; hawk; kiwi; lark; ostrich; parakeet; penguin; pheasant; rhea; skimmer; skua; sparrow; swan; vulture; wren
 3,pitviper; seasnake; slowworm; tortoise; tuatara
@@ -40,4 +41,5 @@ Catsize,Si,No
 5,frog; frog; newt; toad
 6,flea; gnat; honeybee; housefly; ladybird; moth; termite; wasp
 7,clam; crab; crayfish; lobster; octopus; scorpion; seawasp; slug; starfish; worm
-#
+#Sentence for useful cases
+singleAnswer,Ok, l'animale al quale stavi pensando dovrebbe essere fra questi:

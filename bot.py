@@ -7,7 +7,7 @@ from telegram import (ReplyKeyboardMarkup, ReplyKeyboardRemove)
 from copy import deepcopy
 import logging
 import logging.handlers
-from treeAnimals import init, convert
+from decisionTreeSupport import init, convert
 
 import xml.etree.ElementTree as ET
 
@@ -44,7 +44,7 @@ CHOOSINGTREE, INTERACT = range(2)
 LOG_FILENAME = 'logs.log'
 treeData = {}
 logging.basicConfig(filename=LOG_FILENAME, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.DEBUG)
+                    level=logging.INFO)
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.handlers.RotatingFileHandler(LOG_FILENAME, maxBytes=20000000, backupCount=5))
 
@@ -67,21 +67,33 @@ def startInteraction(bot, update, chat_data):
 	return INTERACT
 
 
-def interactAnimals(bot, update, chat_data):
-	# Retrieve the data dictionary for tree interaction
-	if 'Animals' in chat_data:
-		data = chat_data['Animals']
+def interactionManager(bot, update, chat_data):
+	chose = update.message.text
+	if chose in treeData:
+		chat_data['chose'] = chose
+		return interact(bot, update, chat_data, chose)
+	elif 'chose' in chat_data:
+		return interact(bot, update, chat_data, chat_data['chose'])
 	else:
-		data = deepcopy(treeData['Animals'])
-		chat_data['Animals'] = data
+		bot.send_message(chat_id=update.message.chat_id, text="Scusa, ma non credo di disporre di questo dato...")
+		return startInteraction(bot, update, chat_data)
+
+
+def interact(bot, update, chat_data, chose):
+	# Retrieve the data dictionary for tree interactionManager
+	if chose in chat_data:
+		data = chat_data[chose]
+	else:
+		data = deepcopy(treeData[chose])
+		chat_data[chose] = data
 		chat_data['step'] = 1  # 1 = ask question, 0 = process answer
-	dt = treeData['dtAnimals']
+	dt = treeData['dt' + chose]
 
 	while not data['__stop']:
 		toAsk = data['toAsk']
 		if data['step'] == 1:
 			if 'valueRange' in toAsk:
-				# Se la featuere ha valore numerico compreso in un intervallo:
+				# IF the feature has numeric value within an interval:
 				if chat_data['step']:
 					question = data['questions'][toAsk['feature']] + "Range: " + str(toAsk['valueRange'])
 					update.message.reply_text(question, reply_markup=ReplyKeyboardRemove())
@@ -97,24 +109,32 @@ def interactAnimals(bot, update, chat_data):
 					update.message.reply_text(question, reply_markup=ReplyKeyboardRemove())
 					return INTERACT
 			elif 'possibleAnswer' in toAsk:
-				# se la feature ha valore simbolico
+				# If the features has a symbolic value
 				if chat_data['step']:
-					# print(toAsk['possibleAnswer'])
-					reply_keyboard = [[str(x) for x in toAsk['possibleAnswer']]]
-					# print(reply_keyboard)
+					if 'featuresHumanization' in data and toAsk['feature'] in data['featuresHumanization']:
+						reply_keyboard = [[str(x) for x in data['featuresHumanization'][toAsk['feature']]]]
+					else:
+						reply_keyboard = [[str(x) for x in toAsk['possibleAnswer']]]
 					update.message.reply_text(data['questions'][toAsk['feature']],
 					                          reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
 					chat_data['step'] = 0
 					return INTERACT
 				else:
-					user_value_for_feature = convert(update.message.text.strip())
+					if 'featuresHumanization' in data and toAsk['feature'] in data['featuresHumanization']:
+						user_value_for_feature = convert(data['featuresHumanization'][toAsk['feature']]
+						                                 .index(update.message.text.strip()))
+					else:
+						user_value_for_feature = convert(update.message.text.strip())
 					if user_value_for_feature in toAsk['possibleAnswer']:
 						data['step'] = 0
 						data['toAsk']['givenAnswer'] = user_value_for_feature
 						data = dt.classify_by_asking_questions(data['actualNode'], data)
 						chat_data['step'] = 1
 					else:
-						reply_keyboard = [toAsk['possibleAnswer']]
+						if 'featuresHumanization' in data and toAsk['feature'] in data['featuresHumanization']:
+							reply_keyboard = [[str(x) for x in data['featuresHumanization'][toAsk['feature']]]]
+						else:
+							reply_keyboard = [[str(x) for x in toAsk['possibleAnswer']]]
 						update.message.reply_text("Valore non valido!\n" + data['questions'][toAsk['feature']],
 						                          reply_markup=ReplyKeyboardMarkup(reply_keyboard,
 						                                                           one_time_keyboard=True))
@@ -123,31 +143,38 @@ def interactAnimals(bot, update, chat_data):
 			logger.critical("Sono finito in uno stato morto...")
 			del chat_data['Animals'], data
 			update.message.reply_text(
-				"Perdona, mi sono rotto un braccio! devo scappare in ospedale :(\nTi lascio con mio fratello, ma devi ricominciare.",
+				"Perdona, mi sono rotto un braccio! devo scappare in ospedale :("
+				"\nTi lascio con mio fratello, ma devi ricominciare.",
 				reply_markup=ReplyKeyboardRemove())
 			return ConversationHandler.END
 
-	message = "Ottimo! Ho trovato qualcosa!"
+	message = "Ottimo! Ho trovato qualcosa!\n"
 	classification = data['a']
 	del classification['solution_path']
 	which_classes = list(classification.keys())
 	which_classes = sorted(which_classes, key=lambda x: classification[x], reverse=True)
 	if classification[which_classes[0]] < 1:
-		message += "\n\nEcco la probabilità delle risposte, io sceglierei la prima ;)\n"
+		message += "\nEcco la probabilità delle risposte, io sceglierei la prima ;)\n"
 		message += "\n     " + str.ljust("Classe", 30) + "Probabilità"
 		message += "\n     ----------                    -----------"
 		for which_class in which_classes:
 			if which_class is not 'solution_path' and classification[which_class] > 0:
 				message += "\n     " + str.ljust(which_class, 30) + str(round(classification[which_class], 2))
 	else:
-		message += "\n\nSai cosa?, sono quasi sicuro che la risposta corretta sia " + str(which_classes[0])
+		if 'singleAnswer' in data['interaction']:
+			message += data['interaction']['singleAnswer'] + '\n'
+		else:
+			message += "\n\nSai cosa?, sono quasi sicuro che la risposta corretta sia "
+		if str(which_classes[0][5:]) in data['classHumanization']:
+			message += data['classHumanization'][str(which_classes[0][5:])]
+		else:
+			message += str(which_classes[0])
 
 	message += "\nCosa vuoi fare?"
-	reply_keyboard = [['Ricomincia', 'Esci'], ['Valuta la classificazione']]
+	reply_keyboard = [['Ricomincia', 'Esci'], ]  # ['Valuta la classificazione']]
 	update.message.reply_text(message, reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=False))
 
-
-	del chat_data['Animals'], data
+	del chat_data['Animals'], data, chat_data['chose']
 	return CHOOSINGTREE
 
 
@@ -155,7 +182,7 @@ def main():
 	for name, v in datasets.items():
 		logging.info("Start training tree " + name)
 		data = init(v['dataset_name'], v['class_column'], v['data_columns'])
-		treeData['td' + name] = data['dt']
+		treeData['dt' + name] = data['dt']
 		del data['dt']
 		treeData[name] = data
 		# data['actualNode'].display_decision_tree("   ")
@@ -176,8 +203,8 @@ def main():
 		entry_points=[CommandHandler('exploretree', startInteraction, pass_chat_data=True)],
 
 		states={
-			INTERACT: [  # RegexHandler('^(Animals)$', interactAnimals, pass_chat_data=True),
-				MessageHandler(Filters.text, interactAnimals, pass_chat_data=True)],
+			INTERACT: [  # RegexHandler('^(Animals)$', interactionManager, pass_chat_data=True),
+				MessageHandler(Filters.text, interactionManager, pass_chat_data=True)],
 			CHOOSINGTREE: [RegexHandler('^(Ricomincia)$', startInteraction, pass_chat_data=True),
 			               RegexHandler('^(Esci)$', cancel, pass_chat_data=True),
 			               RegexHandler('^(Valuta la classificazione)$', tbd, pass_chat_data=True)]

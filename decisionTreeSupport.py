@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 ## classify_by_asking_questions.py
 
 import DTC.DecisionTree as DecisionTree
@@ -15,13 +14,18 @@ def convert(value):
 		return value
 
 
-# training_datafile = "InputData" + sep + "zoo_1.csv"
-# questions_datafile = "InputData" + sep + "zoo_1_interaction.csv"
-
-
 def init(dsname: str, csv_class_column_index: int, csv_columns_for_features: list):
+	"""
+	This method init the tree structur, ready for interactive navigation.
+	
+	:param dsname: name of dataset file to be load. It must be under ./InpoutData/
+	:param csv_class_column_index: index of (from 0) for the column that contain the class inside the dataset
+	:param csv_columns_for_features: List of indexes of the column that contains the feature that should be considered
+	:type csv_class_column_index: int
+	:type csv_columns_for_features: List<int>
+	"""
 	training_datafile = "InputData" + sep + dsname
-	questions_datafile = training_datafile[:-4] + "_interaction.csv"
+	interaction_datafile = training_datafile[:-4] + "_interaction.csv"
 	dt = DecisionTree(training_datafile=training_datafile,
 	                  csv_class_column_index=csv_class_column_index,
 	                  csv_columns_for_features=csv_columns_for_features,
@@ -37,22 +41,56 @@ def init(dsname: str, csv_class_column_index: int, csv_columns_for_features: lis
 
 	root_node = dt.construct_decision_tree_classifier()
 
+	# start importing the data about questions and features humanization
 	data = dt.classify_by_asking_questions(root_node)
+	data['dt'] = dt
 	data['questions'] = {}
+	data['featuresHumanization'] = {}
+	data['classHumanization'] = {}
+	data['interaction'] = {}
 
-	with open(questions_datafile, 'r') as csv_file:
-		rows = reader(csv_file, delimiter=',')
-		r = []
-		for row in rows:
-			r.append(row)
+	with open(interaction_datafile, 'r') as csv_file:
+		# rows = reader(csv_file, delimiter=',')
+		r = [row.strip().split(',') for row in csv_file]
 		numbers = r[0]
 		del r[0]
 		nQuestions = int(numbers[0])
+		nFeatures = int(numbers[1])
+		nClasses = int(numbers[2])
 
-		for i in range(nQuestions - 1):
-			if r[i][0][0] == '#': continue
-			data['questions'][r[i][0]] = r[i][1]
-	data['dt'] = dt
+		for i in range(len(r)):
+			if r[i][0][0] == "#":
+				continue
+			elif i <= nQuestions + 1:
+				data['questions'][r[i][0]] = r[i][1]
+			elif i <= nQuestions + nFeatures + 2:
+				data['featuresHumanization'][r[i][0]] = r[i][1:]
+			elif i <= nQuestions + nFeatures + nClasses + 3:
+				data['classHumanization'][r[i][0]] = ",".join(r[i][1:])
+			elif r[i][0] == 'singleAnswer':
+				data['interaction']['singleAnswer'] = ",".join(r[i][1:])
+
+			# # read data for questions
+			# for i in range(nQuestions - 1):
+			# 	if r[i][0][0] == "#":
+			# 		continue
+			# 	data['questions'][r[i][0]] = r[i][1]
+			# 	r.pop(i)
+			#
+			# # read data for feature humanization
+			# for i in range(nFeatures - 1):
+			# 	if r[i][0][0] == "#":
+			# 		continue
+			# 	data['featuresHumanization'][r[i][0]] = r[i][1:]
+			# 	r.pop(i)
+			#
+			# # read data for class answering
+			# for i in range(nClasses - 1):
+			# 	if r[i][0][0] == "#":
+			# 		continue
+			# 	data['classHumanization'][r[i][0]] = r[i][1:]
+			# 	r.pop(i)
+
 	return data
 
 
