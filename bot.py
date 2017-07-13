@@ -9,11 +9,36 @@ import logging
 import logging.handlers
 from treeAnimals import init, convert
 
-config = configparser.ConfigParser()
-config.read('configuration.ini')
-config.sections()
-Telegram_BOTID = config['TOKENS']['telegram_botid']
-AdminPassword = config['TOKENS']['admin_password']
+import xml.etree.ElementTree as ET
+
+tree = ET.parse('config.xml')
+root = tree.getroot()
+Telegram_BOTID = root.find('telegramBotid').text
+AdminPassword = root.find('adminPassword').text
+datasets = {}
+for ds in root.findall('dataset'):
+	name = ds.get('name')
+	datasets[name] = {}
+	datasets[name]['dataset_name'] = ds.find('filename').text
+	datasets[name]['class_column'] = int(ds.find('classColumn').text)
+	datasets[name]['data_columns'] = [int(x) for x in ds.find('dataColumns').text.split(',')]
+del tree, root
+
+# exludedSections = ['TOKENS', 'DEFAULT']
+# config = configparser.ConfigParser()
+# config.read('configuration.ini')
+# config.sections()
+# Telegram_BOTID = config['TOKENS']['telegram_botid']
+# AdminPassword = config['TOKENS']['admin_password']
+# datasets = {}
+# for k in config.keys():
+# 	if k not in datasets and k not in exludedSections:
+# 		# noinspection PyBroadException
+# 		try:
+#
+# 		except:
+# 			continue
+
 
 CHOOSINGTREE, INTERACT = range(2)
 LOG_FILENAME = 'logs.log'
@@ -21,7 +46,7 @@ treeData = {}
 logging.basicConfig(filename=LOG_FILENAME, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.DEBUG)
 logger = logging.getLogger(__name__)
-logger.addHandler(logging.handlers.RotatingFileHandler(LOG_FILENAME, maxBytes=2000, backupCount=5))
+logger.addHandler(logging.handlers.RotatingFileHandler(LOG_FILENAME, maxBytes=20000000, backupCount=5))
 
 from botFunctions import *
 
@@ -127,14 +152,17 @@ def interactAnimals(bot, update, chat_data):
 
 
 def main():
-	logging.info("Start training tree")
-	data = init("zoo_1.csv", 18, [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17])
-	treeData['dtAnimals'] = data['dt']
-	del data['dt']
-	treeData['Animals'] = data
-	# data['actualNode'].display_decision_tree("   ")
-	logging.info("End training tree")
+	for name, v in datasets.items():
+		logging.info("Start training tree " + name)
+		data = init(v['dataset_name'], v['class_column'], v['data_columns'])
+		treeData['td' + name] = data['dt']
+		del data['dt']
+		treeData[name] = data
+		# data['actualNode'].display_decision_tree("   ")
+		logging.info("End training tree " + name)
+
 	logging.info("Bot Starting...!")
+
 	updater = Updater(token=Telegram_BOTID)
 	dispatcher = updater.dispatcher
 
