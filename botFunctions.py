@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: iso-8859-1 -*-
-from bot import CHOOSINGTREE, logger, ConversationHandler, ReplyKeyboardRemove
+from bot import CHOOSINGTREE, logger, ConversationHandler, ReplyKeyboardRemove, availableClassifierName
 from requests import get
 
 
@@ -49,6 +49,10 @@ def cancel(bot, update, chat_data):
 	logger.info("User %s canceled the conversation." % user.name)
 	update.message.reply_text('Ciao, spero di rivederti presto!',
 	                          reply_markup=ReplyKeyboardRemove())
-	if 'Animals' in chat_data:
-		del chat_data['Animals']
+	for k in availableClassifierName:
+		if k in chat_data:
+			del chat_data[k]
+	if 'choose' in chat_data:
+		del chat_data['choose']
+
 	return ConversationHandler.END

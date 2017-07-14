@@ -2809,27 +2809,27 @@ class DecisionTree(object):
 			answer['solution_path'].append(node.get_serial_num())
 		return answer
 
-	def classify_by_asking_questions(self, root_node, data={}):
+	def classify_by_asking_questions(self, root_node, d={}):
 		'''
 		If you want classification to be carried out by engaging a human user in a
 		question-answer session, this is the method to use for that purpose.  See the
 		script classify_by_asking_questions.py in the Examples subdirectory for an
 		illustration of how to do that.
 		'''
-		if data == {}:
+		if d == {}:
 			answer = {class_name: None for class_name in self._class_names}
 			scratchpad_for_numeric_answers = {feature: None
 			                                  for feature in self._prob_distribution_numeric_features_dict}
 			answer['solution_path'] = []
-			data['__stop'] = False
-			data['step'] = 1  # 1= get node feature details; 0 = process given answer
-			data['toAsk'] = {}
-			data['a'] = answer
-			data['s'] = scratchpad_for_numeric_answers
+			d['__stop'] = False
+			d['step'] = 1  # 1= get node feature details; 0 = process given answer
+			d['toAsk'] = {}
+			d['a'] = answer
+			d['s'] = scratchpad_for_numeric_answers
 		# else:
 		# answer = data['a']
 		# scratchpad_for_numeric_answers = data['s']
-		data = self.interactive_recursive_descent_for_classification(root_node, data=data)
+		d = self.interactive_recursive_descent_for_classification(root_node, data=d)
 		# classification['solution_path'].reverse()
 
 		# classification_for_display = {}
@@ -2839,7 +2839,7 @@ class DecisionTree(object):
 		# 	else:
 		# 		classification_for_display[item] = ["NODE" + str(x) for x in classification[item]]
 		# return classification_for_display
-		return data
+		return d
 
 	def interactive_recursive_descent_for_classification(self, node, answer={}, scratchpad_for_numerics={}, data={}):
 		pattern1 = r'(.+)<(.+)'

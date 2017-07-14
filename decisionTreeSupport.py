@@ -3,6 +3,7 @@
 
 import DTC.DecisionTree as DecisionTree
 from os import sep
+from copy import deepcopy
 from csv import reader
 
 
@@ -42,8 +43,9 @@ def init(dsname: str, csv_class_column_index: int, csv_columns_for_features: lis
 	root_node = dt.construct_decision_tree_classifier()
 
 	# start importing the data about questions and features humanization
-	data = dt.classify_by_asking_questions(root_node)
-	data['dt'] = dt
+	data = dict()
+	data = dt.classify_by_asking_questions(root_node, {})
+	data['dt'] = deepcopy(dt)
 	data['questions'] = {}
 	data['featuresHumanization'] = {}
 	data['classHumanization'] = {}
@@ -90,7 +92,7 @@ def init(dsname: str, csv_class_column_index: int, csv_columns_for_features: lis
 			# 		continue
 			# 	data['classHumanization'][r[i][0]] = r[i][1:]
 			# 	r.pop(i)
-
+	del dt
 	return data
 
 

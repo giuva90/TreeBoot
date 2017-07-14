@@ -43,6 +43,7 @@ del tree, root
 CHOOSINGTREE, INTERACT = range(2)
 LOG_FILENAME = 'logs.log'
 treeData = {}
+availableClassifierName = []
 logging.basicConfig(filename=LOG_FILENAME, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -61,7 +62,11 @@ def start(bot, update):
 
 def startInteraction(bot, update, chat_data):
 	chat_data = {}
-	reply_keyboard = [['Animals', '/cancel']]
+	reply_keyboard = []
+	for k in availableClassifierName:
+		reply_keyboard.append([k])
+	reply_keyboard.append(['/cancel'])
+
 	update.message.reply_text('Ciao, scegli cosa vuoi che indovini.\n\n /cancel se vuoi terminare! ',
 	                          reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
 	return INTERACT
@@ -182,11 +187,16 @@ def main():
 	for name, v in datasets.items():
 		logging.info("Start training tree " + name)
 		data = init(v['dataset_name'], v['class_column'], v['data_columns'])
-		treeData['dt' + name] = data['dt']
+		treeData['dt' + name] = deepcopy(data['dt'])
 		del data['dt']
-		treeData[name] = data
+		treeData[name] = deepcopy(data)
+		del data
 		# data['actualNode'].display_decision_tree("   ")
 		logging.info("End training tree " + name)
+
+	for k in treeData.keys():
+		if not k.startswith('dt'):
+			availableClassifierName.append(k)
 
 	logging.info("Bot Starting...!")
 
