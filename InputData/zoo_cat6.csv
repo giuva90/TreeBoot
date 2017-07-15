@@ -1,0 +1,9 @@
+﻿ID,Name,Hair,Feathers,Eggs,Milk,Airborne,Aquatic,Predator,Thoothed,Beckbone,Breathes,Venomus,Fins,Legs,Tail,Domestic,Catsize,Type
+25,flea,0,0,1,0,0,0,0,0,0,1,0,0,6,0,0,0,6
+31,gnat,0,0,1,0,1,0,0,0,0,1,0,0,6,0,0,0,6
+40,honeybee,1,0,1,0,1,0,0,0,0,1,1,0,6,0,1,0,6
+41,housefly,1,0,1,0,1,0,0,0,0,1,0,0,6,0,0,0,6
+43,ladybird,0,0,1,0,1,0,1,0,0,1,0,0,6,0,0,0,6
+52,moth,1,0,1,0,1,0,0,0,0,1,0,0,6,0,0,0,6
+89,termite,0,0,1,0,0,0,0,0,0,1,0,0,6,0,0,0,6
+98,wasp,1,0,1,0,1,0,0,0,0,1,1,0,6,0,0,0,6

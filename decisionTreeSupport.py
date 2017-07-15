@@ -2,6 +2,7 @@
 ## classify_by_asking_questions.py
 
 import DTC.DecisionTree as DecisionTree
+import re
 from os import sep
 from copy import deepcopy
 from csv import reader
@@ -13,6 +14,13 @@ def convert(value):
 		return answer
 	except:
 		return value
+
+
+def getClassName(name: str) -> str:
+	try:
+		return re.search(r'(.+)=(.+)', name).group(2)
+	except:
+		return name
 
 
 def init(dsname: str, csv_class_column_index: int, csv_columns_for_features: list):

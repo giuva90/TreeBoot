@@ -54,5 +54,7 @@ def cancel(bot, update, chat_data):
 			del chat_data[k]
 	if 'choose' in chat_data:
 		del chat_data['choose']
+	if 'conversationHistory' in chat_data:
+		del chat_data['conversationHistory']
 
 	return ConversationHandler.END

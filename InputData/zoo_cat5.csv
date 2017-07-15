@@ -1,0 +1,5 @@
+﻿ID,Name,Hair,Feathers,Eggs,Milk,Airborne,Aquatic,Predator,Thoothed,Beckbone,Breathes,Venomus,Fins,Legs,Tail,Domestic,Catsize,Type
+26,frog,0,0,1,0,0,1,1,1,1,1,0,0,4,0,0,0,5
+27,frog,0,0,1,0,0,1,1,1,1,1,1,0,4,0,0,0,5
+53,newt,0,0,1,0,0,1,1,1,1,1,0,0,4,1,0,0,5
+90,toad,0,0,1,0,0,1,0,1,1,1,0,0,4,0,0,0,5

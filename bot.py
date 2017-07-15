@@ -7,11 +7,11 @@ from telegram import (ReplyKeyboardMarkup, ReplyKeyboardRemove)
 from copy import deepcopy
 import logging
 import logging.handlers
-from decisionTreeSupport import init, convert
+from decisionTreeSupport import init, convert, getClassName
 
 import xml.etree.ElementTree as ET
 
-tree = ET.parse('config.xml')
+tree = ET.parse('config.xml.localSafeCopy')
 root = tree.getroot()
 Telegram_BOTID = root.find('telegramBotid').text
 AdminPassword = root.find('adminPassword').text
@@ -22,22 +22,10 @@ for ds in root.findall('dataset'):
 	datasets[name]['dataset_name'] = ds.find('filename').text
 	datasets[name]['class_column'] = int(ds.find('classColumn').text)
 	datasets[name]['data_columns'] = [int(x) for x in ds.find('dataColumns').text.split(',')]
+	if ds.find('successorOf') is not None:
+		datasets[name]['successorOf'] = ds.find('successorOf').text
+		datasets[name]['previousExitClass'] = ds.find('previousExitClass').text
 del tree, root
-
-# exludedSections = ['TOKENS', 'DEFAULT']
-# config = configparser.ConfigParser()
-# config.read('configuration.ini')
-# config.sections()
-# Telegram_BOTID = config['TOKENS']['telegram_botid']
-# AdminPassword = config['TOKENS']['admin_password']
-# datasets = {}
-# for k in config.keys():
-# 	if k not in datasets and k not in exludedSections:
-# 		# noinspection PyBroadException
-# 		try:
-#
-# 		except:
-# 			continue
 
 
 CHOOSINGTREE, INTERACT = range(2)
@@ -64,7 +52,8 @@ def startInteraction(bot, update, chat_data):
 	chat_data = {}
 	reply_keyboard = []
 	for k in availableClassifierName:
-		reply_keyboard.append([k])
+		if 'isSuccessors' not in treeData[k]:
+			reply_keyboard.append([k])
 	reply_keyboard.append(['/cancel'])
 
 	update.message.reply_text('Ciao, scegli cosa vuoi che indovini.\n\n /cancel se vuoi terminare! ',
@@ -92,23 +81,32 @@ def interact(bot, update, chat_data, chose):
 		data = deepcopy(treeData[chose])
 		chat_data[chose] = data
 		chat_data['step'] = 1  # 1 = ask question, 0 = process answer
+		if 'hasSuccessors' in data:
+			chat_data['conversationHistory'] = {}
 	dt = treeData['dt' + chose]
 
 	while not data['__stop']:
 		toAsk = data['toAsk']
 		if data['step'] == 1:
+			if 'isSuccessors' in data and toAsk['feature'] in chat_data['conversationHistory']:
+				chat_data['step'] = 0
+				update.message.text = str(chat_data['conversationHistory'][toAsk['feature']])
 			if 'valueRange' in toAsk:
 				# IF the feature has numeric value within an interval:
 				if chat_data['step']:
 					question = data['questions'][toAsk['feature']] + "Range: " + str(toAsk['valueRange'])
 					update.message.reply_text(question, reply_markup=ReplyKeyboardRemove())
+					chat_data['step'] = 0
 					return INTERACT
 				else:
 					user_value_for_feature = convert(update.message.text.strip())
 				if toAsk['valueRange'][0] <= user_value_for_feature <= toAsk['valueRange'][1]:
+					if 'hasSuccessors' in data:
+						chat_data['conversationHistory'][toAsk['feature']] = user_value_for_feature
 					data['step'] = 0
 					data['s'][toAsk['feature']] = user_value_for_feature
 					data = dt.classify_by_asking_questions(data['actualNode'], data)
+					chat_data['step'] = 1
 				else:
 					question = data['questions'][toAsk['feature']] + "Range: " + str(toAsk['valueRange'])
 					update.message.reply_text(question, reply_markup=ReplyKeyboardRemove())
@@ -131,6 +129,8 @@ def interact(bot, update, chat_data, chose):
 					else:
 						user_value_for_feature = convert(update.message.text.strip())
 					if user_value_for_feature in toAsk['possibleAnswer']:
+						if 'hasSuccessors' in data:
+							chat_data['conversationHistory'][toAsk['feature']] = user_value_for_feature
 						data['step'] = 0
 						data['toAsk']['givenAnswer'] = user_value_for_feature
 						data = dt.classify_by_asking_questions(data['actualNode'], data)
@@ -153,7 +153,8 @@ def interact(bot, update, chat_data, chose):
 				reply_markup=ReplyKeyboardRemove())
 			return ConversationHandler.END
 
-	message = "Ottimo! Ho trovato qualcosa!\n"
+	update.message.reply_text("Ottimo! Ho trovato qualcosa!\n")
+	message = ""
 	classification = data['a']
 	del classification['solution_path']
 	which_classes = list(classification.keys())
@@ -164,28 +165,37 @@ def interact(bot, update, chat_data, chose):
 		message += "\n     ----------                    -----------"
 		for which_class in which_classes:
 			if which_class is not 'solution_path' and classification[which_class] > 0:
-				message += "\n     " + str.ljust(which_class, 30) + str(round(classification[which_class], 2))
+				message += "\n     " + str.ljust(getClassName(which_class), 30) + str(
+					round(classification[which_class], 2))
 	else:
 		if 'singleAnswer' in data['interaction']:
 			message += data['interaction']['singleAnswer'] + '\n'
 		else:
 			message += "\n\nSai cosa?, sono quasi sicuro che la risposta corretta sia "
 		if str(which_classes[0][5:]) in data['classHumanization']:
-			message += data['classHumanization'][str(which_classes[0][5:])]
+			message += getClassName(data['classHumanization'][str(which_classes[0][5:])])
 		else:
-			message += str(which_classes[0])
+			message += getClassName(str(which_classes[0]))
+
+	# handling of connection among tree
+	if 'hasSuccessors' in data:
+		update.message.reply_text("Continuiamo con le domand, vediamo dodve arriviamo...\n")
+		chat_data['chose'] = data['successorsMap'][getClassName(which_classes[0])]
+		del data, chat_data[chose]
+		return interact(bot, update, chat_data, chat_data['chose'])
 
 	message += "\nCosa vuoi fare?"
 	reply_keyboard = [['Ricomincia', 'Esci'], ]  # ['Valuta la classificazione']]
 	update.message.reply_text(message, reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
 
-	del chat_data[chose], data, chat_data['chose']
+	del chat_data[chose], data, chat_data['chose'], chat_data['conversationHistory']
 	return CHOOSINGTREE
 
 
 def main():
 	for name, v in datasets.items():
 		logging.info("Start training tree " + name)
+		print("Start training tree " + name)
 		data = init(v['dataset_name'], v['class_column'], v['data_columns'])
 		treeData['dt' + name] = deepcopy(data['dt'])
 		del data['dt']
@@ -193,6 +203,15 @@ def main():
 		# data['actualNode'].display_decision_tree("   ")
 		del data
 		logging.info("End training tree " + name)
+		print("End training tree " + name)
+		# computing connection among trees
+		if 'successorOf' in v:
+			treeData[name]['isSuccessors'] = True
+			treeData[v['successorOf']]['hasSuccessors'] = True
+			if 'successorsMap' in treeData[v['successorOf']]:
+				treeData[v['successorOf']]['successorsMap'][v['previousExitClass']] = name
+			else:
+				treeData[v['successorOf']]['successorsMap'] = {v['previousExitClass']: name}
 
 	for k in treeData.keys():
 		if not k.startswith('dt'):

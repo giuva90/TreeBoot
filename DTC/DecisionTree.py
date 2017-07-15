@@ -2657,7 +2657,8 @@ class DecisionTree(object):
 		self._feature_values_how_many_uniques_dict = feature_values_how_many_uniques_dict
 
 	def calculate_first_order_probabilities(self):
-		print("\nEstimating probabilities...")
+		if self._debug1:
+			print("\nEstimating probabilities...")
 		for feature in self._feature_names:
 			self.probability_of_feature_value(feature, None)
 			if self._debug2:
@@ -2985,7 +2986,8 @@ class DecisionTree(object):
 		Construct the root node object and set its entropy value as derived from the priors
 		associated with the different classes.
 		'''
-		print("\nConstructing a decision tree...")
+		if self._debug1:
+			print("\nConstructing a decision tree...")
 		if self._debug3:
 			self.determine_data_condition()
 			print("\nStarting construction of the decision tree:\n")
@@ -3467,7 +3469,8 @@ class DecisionTree(object):
 		self._class_priors_dict
 		and self._probability_cache 
 		"""
-		print("\nEstimating class priors...")
+		if self._debug1:
+			print("\nEstimating class priors...")
 		if len(self._class_priors_dict) > 1: return
 		for class_name in self._class_names:
 			class_name_in_cache = "".join(["prior::", class_name])

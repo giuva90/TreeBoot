@@ -1,0 +1,6 @@
+﻿ID,Name,Hair,Feathers,Eggs,Milk,Airborne,Aquatic,Predator,Thoothed,Beckbone,Breathes,Venomus,Fins,Legs,Tail,Domestic,Catsize,Type
+63,pitviper,0,0,1,0,0,0,1,1,1,1,1,0,0,1,0,0,3
+77,seasnake,0,0,0,0,0,1,1,1,1,0,1,0,0,1,0,0,3
+81,slowworm,0,0,1,0,0,0,1,1,1,1,0,0,0,1,0,0,3
+91,tortoise,0,0,1,0,0,0,0,0,1,1,0,0,4,1,0,1,3
+92,tuatara,0,0,1,0,0,0,1,1,1,1,0,0,4,1,0,0,3
