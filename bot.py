@@ -204,7 +204,9 @@ def main():
 		del data
 		logging.info("End training tree " + name)
 		print("End training tree " + name)
-		# computing connection among trees
+
+	# computing connection among trees
+	for name, v in datasets.items():
 		if 'successorOf' in v:
 			treeData[name]['isSuccessors'] = True
 			treeData[v['successorOf']]['hasSuccessors'] = True
