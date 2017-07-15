@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<config>
+	<telegramBotid>YOURTOKEN</telegramBotid>
+	<adminPassword>YOURPASSWORD</adminPassword>
+	<dataset name="Animals">
+		<filename>zoo_1.csv</filename>
+		<classColumn>18</classColumn>
+		<dataColumns>2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17</dataColumns>
+	</dataset>
+	<dataset name="Animals_cat1">
+		<filename>zoo_cat1.csv</filename>
+		<classColumn>1</classColumn>
+		<dataColumns>2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17</dataColumns>
+	</dataset>
+</config>
