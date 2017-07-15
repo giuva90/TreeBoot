@@ -33,7 +33,7 @@ LOG_FILENAME = 'logs.log'
 treeData = {}
 availableClassifierName = []
 logging.basicConfig(filename=LOG_FILENAME, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO)
+                    level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.handlers.RotatingFileHandler(LOG_FILENAME, maxBytes=20000000, backupCount=5))
 
