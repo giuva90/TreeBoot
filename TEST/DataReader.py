@@ -6,9 +6,10 @@ without the ".csv" at the end
 The input is the list of the file that must be loaded.
 The file are loaded from the folder "InputData"
 """
-from dataset import Dataset
 from csv import reader
 from os import sep
+
+from TEST.dataset import Dataset
 
 
 def loadCsvFilesFromList(file_names=['LensData.csv'], parseID=True):

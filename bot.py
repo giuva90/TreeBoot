@@ -11,7 +11,7 @@ from decisionTreeSupport import init, convert, getClassName
 
 import xml.etree.ElementTree as ET
 
-tree = ET.parse('config.xml')
+tree = ET.parse('config.xml.localSafeCopy')
 root = tree.getroot()
 Telegram_BOTID = root.find('telegramBotID').text
 AdminPassword = root.find('adminPassword').text

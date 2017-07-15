@@ -3,11 +3,13 @@ This component allow the creation of the model of decisions trees
 
 """
 
-import DataReader
+from os import sep
+from pickle import dump, load
+
 from dataset import Dataset
 from sklearn import tree
-from pickle import dump, load
-from os import sep
+
+from TEST import DataReader
 
 
 class MakeTreesModel:
