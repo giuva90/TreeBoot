@@ -3462,6 +3462,11 @@ class DecisionTree(object):
 		return self._probability_cache[class_name_in_cache]
 
 	def calculate_class_priors(self):
+		"""
+		Compute the prior probabilities for each class and put it into 
+		self._class_priors_dict
+		and self._probability_cache 
+		"""
 		print("\nEstimating class priors...")
 		if len(self._class_priors_dict) > 1: return
 		for class_name in self._class_names:
@@ -3811,9 +3816,13 @@ class DecisionTree(object):
 		This method requires that all truly numeric types only be expressed as '<' or '>'
 		constructs in the array of branch features and thresholds
 		'''
+
 		if len(array_of_features_and_values_or_thresholds) == 0: return
 		sequence = ":".join(array_of_features_and_values_or_thresholds)
 		sequence_with_class = sequence + "::" + class_name
+		# if class_name == "Name=wallaby":
+		# 	bho = 1
+		# 	bho += 1
 		if sequence_with_class in self._probability_cache:
 			return self._probability_cache[sequence_with_class]
 		probability = None
@@ -3857,7 +3866,7 @@ class DecisionTree(object):
 					and upperbound[feature_name] <= lowerbound[feature_name]:
 				return 0
 			elif lowerbound[feature_name] is not None and upperbound[feature_name] is not None:
-				if not probability:
+				if probability is None:
 					probability = self.probability_of_feature_less_than_threshold_given_class(feature_name,
 					                                                                          upperbound[feature_name],
 					                                                                          class_name) - \
@@ -3874,7 +3883,7 @@ class DecisionTree(object):
 						                                                                            feature_name],
 					                                                                            class_name))
 			elif upperbound[feature_name] is not None and lowerbound[feature_name] is None:
-				if not probability:
+				if probability is None:
 					probability = self.probability_of_feature_less_than_threshold_given_class(feature_name,
 					                                                                          upperbound[feature_name],
 					                                                                          class_name)
@@ -3883,7 +3892,7 @@ class DecisionTree(object):
 					                                                                           upperbound[feature_name],
 					                                                                           class_name)
 			elif lowerbound[feature_name] is not None and upperbound[feature_name] is None:
-				if not probability:
+				if probability is None:
 					probability = 1.0 - \
 					              self.probability_of_feature_less_than_threshold_given_class(feature_name,
 					                                                                          lowerbound[feature_name],
@@ -3900,7 +3909,7 @@ class DecisionTree(object):
 			if re.search(pattern1, feature_and_value):
 				m = re.search(pattern1, feature_and_value)
 				feature, value = m.group(1), m.group(2)
-				if not probability:
+				if probability is None:
 					probability = self.probability_of_feature_value_given_class(feature, value, class_name)
 				else:
 					probability *= self.probability_of_feature_value_given_class(feature, value, class_name)

@@ -177,9 +177,9 @@ def interact(bot, update, chat_data, chose):
 
 	message += "\nCosa vuoi fare?"
 	reply_keyboard = [['Ricomincia', 'Esci'], ]  # ['Valuta la classificazione']]
-	update.message.reply_text(message, reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=False))
+	update.message.reply_text(message, reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
 
-	del chat_data['Animals'], data, chat_data['chose']
+	del chat_data[chose], data, chat_data['chose']
 	return CHOOSINGTREE
 
 
@@ -190,8 +190,8 @@ def main():
 		treeData['dt' + name] = deepcopy(data['dt'])
 		del data['dt']
 		treeData[name] = deepcopy(data)
-		del data
 		# data['actualNode'].display_decision_tree("   ")
+		del data
 		logging.info("End training tree " + name)
 
 	for k in treeData.keys():
