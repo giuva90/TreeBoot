@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <config>
-	<telegramBotid>YOURTOKEN</telegramBotid>
+	<telegramBotID>YOURTOKEN</telegramBotID>
 	<adminPassword>YOURPASSWORD</adminPassword>
 	<dataset name="Animals">
 		<filename>zoo_1.csv</filename>
@@ -14,36 +14,46 @@
 		<successorOf>Animals</successorOf>
 		<previousExitClass>1</previousExitClass>
 	</dataset>
-	<!--
 	<dataset name="Animals_cat2">
 		<filename>zoo_cat2.csv</filename>
 		<classColumn>1</classColumn>
 		<dataColumns>2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17</dataColumns>
+		<successorOf>Animals</successorOf>
+		<previousExitClass>2</previousExitClass>
 	</dataset>
 	<dataset name="Animals_cat3">
 		<filename>zoo_cat3.csv</filename>
 		<classColumn>1</classColumn>
 		<dataColumns>2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17</dataColumns>
+		<successorOf>Animals</successorOf>
+		<previousExitClass>3</previousExitClass>
 	</dataset>
 	<dataset name="Animals_cat4">
 		<filename>zoo_cat4.csv</filename>
 		<classColumn>1</classColumn>
 		<dataColumns>2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17</dataColumns>
+		<successorOf>Animals</successorOf>
+		<previousExitClass>4</previousExitClass>
 	</dataset>
 	<dataset name="Animals_cat5">
 		<filename>zoo_cat5.csv</filename>
 		<classColumn>1</classColumn>
 		<dataColumns>2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17</dataColumns>
+		<successorOf>Animals</successorOf>
+		<previousExitClass>5</previousExitClass>
 	</dataset>
 	<dataset name="Animals_cat6">
 		<filename>zoo_cat6.csv</filename>
 		<classColumn>1</classColumn>
 		<dataColumns>2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17</dataColumns>
+		<successorOf>Animals</successorOf>
+		<previousExitClass>6</previousExitClass>
 	</dataset>
 	<dataset name="Animals_cat7">
 		<filename>zoo_cat7.csv</filename>
 		<classColumn>1</classColumn>
 		<dataColumns>2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17</dataColumns>
+		<successorOf>Animals</successorOf>
+		<previousExitClass>7</previousExitClass>
 	</dataset>
-	-->
 </config>
