@@ -23,6 +23,12 @@ def getClassName(name: str) -> str:
 		return name
 
 
+def getFetureDict(values: list) -> dict:
+	d = {}
+	for v in values:
+		d[re.search(r'(.+)=(.+)', v).group(2)] = re.search(r'(.+)=(.+)', v).group(1)
+	return d
+
 def init(dsname: str, csv_class_column_index: int, csv_columns_for_features: list):
 	"""
 	This method init the tree structur, ready for interactive navigation.
@@ -74,7 +80,7 @@ def init(dsname: str, csv_class_column_index: int, csv_columns_for_features: lis
 			elif i <= nQuestions + 1:
 				data['questions'][r[i][0]] = r[i][1]
 			elif i <= nQuestions + nFeatures + 2:
-				data['featuresHumanization'][r[i][0]] = r[i][1:]
+				data['featuresHumanization'][r[i][0]] = getFetureDict(r[i][1:])
 			elif i <= nQuestions + nFeatures + nClasses + 3:
 				data['classHumanization'][r[i][0]] = ",".join(r[i][1:])
 			elif r[i][0] == 'singleAnswer':

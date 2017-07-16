@@ -18,21 +18,21 @@ Tail,Ha la coda?
 Domestic,e' domestico?
 Catsize,Ha le dimensioni di un gatto?
 # Risposte (Caso in cui il dataset non contiene i dati in formato testuale)
-Hair,Si,No
-Feathers,Si,No
-Eggs,Si,No
-Milk,Si,No
-Airborne,Si,No
-Aquatic,Si,No
-Predator,Si,No
-Thoothed,Si,No
-Beckbone,Si,No
-Breathes,Si,No
-Venomus,Si,No
-Fins,Si,No
-Tail,Si,No
-Domestic,Si,No
-Catsize,Si,No
+Hair,1=Si,0=No
+Feathers,1=Si,0=No
+Eggs,1=Si,0=No
+Milk,1=Si,0=No
+Airborne,1=Si,0=No
+Aquatic,1=Si,0=No
+Predator,1=Si,0=No
+Thoothed,1=Si,0=No
+Beckbone,1=Si,0=No
+Breathes,1=Si,0=No
+Venomus,1=Si,0=No
+Fins,1=Si,0=No
+Tail,1=Si,0=No
+Domestic,1=Si,0=No
+Catsize,1=Si,0=No
 #Class name human readable
 1,aardvark; antelope; bear; boar; buffalo; calf;cavy; cheetah; deer; dolphin; elephant; fruitbat; giraffe; girl; goat; gorilla; hamster; hare; leopard; lion; lynx; mink; mole; mongoose; opossum; oryx; platypus; polecat; pony; porpoise; puma; pussycat; raccoon; reindeer; seal; sealion; squirrel; vampire; vole; wallaby;wolf
 2,chicken; crow; dove; duck; flamingo; gull; hawk; kiwi; lark; ostrich; parakeet; penguin; pheasant; rhea; skimmer; skua; sparrow; swan; vulture; wren

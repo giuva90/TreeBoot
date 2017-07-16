@@ -81,7 +81,7 @@ def interact(bot, update, chat_data, chose):
 		data = deepcopy(treeData[chose])
 		chat_data[chose] = data
 		chat_data['step'] = 1  # 1 = ask question, 0 = process answer
-		if 'hasSuccessors' in data:
+		if 'conversationHistory' not in data:
 			chat_data['conversationHistory'] = {}
 	dt = treeData['dt' + chose]
 
@@ -101,8 +101,7 @@ def interact(bot, update, chat_data, chose):
 				else:
 					user_value_for_feature = convert(update.message.text.strip())
 				if toAsk['valueRange'][0] <= user_value_for_feature <= toAsk['valueRange'][1]:
-					if 'hasSuccessors' in data:
-						chat_data['conversationHistory'][toAsk['feature']] = user_value_for_feature
+					chat_data['conversationHistory'][toAsk['feature']] = user_value_for_feature
 					data['step'] = 0
 					data['s'][toAsk['feature']] = user_value_for_feature
 					data = dt.classify_by_asking_questions(data['actualNode'], data)
@@ -124,13 +123,12 @@ def interact(bot, update, chat_data, chose):
 					return INTERACT
 				else:
 					if 'featuresHumanization' in data and toAsk['feature'] in data['featuresHumanization']:
-						user_value_for_feature = convert(data['featuresHumanization'][toAsk['feature']]
-						                                 .index(update.message.text.strip()))
+						user_value_for_feature = convert(
+							data['featuresHumanization'][toAsk['feature']][update.message.text.strip()])
 					else:
 						user_value_for_feature = convert(update.message.text.strip())
 					if user_value_for_feature in toAsk['possibleAnswer']:
-						if 'hasSuccessors' in data:
-							chat_data['conversationHistory'][toAsk['feature']] = user_value_for_feature
+						chat_data['conversationHistory'][toAsk['feature']] = user_value_for_feature
 						data['step'] = 0
 						data['toAsk']['givenAnswer'] = user_value_for_feature
 						data = dt.classify_by_asking_questions(data['actualNode'], data)
@@ -146,7 +144,9 @@ def interact(bot, update, chat_data, chose):
 						return INTERACT
 		else:
 			logger.critical("Sono finito in uno stato morto...")
-			del chat_data['Animals'], data
+			logger.critical("Albero: " + chat_data[chose])
+			logger.critical("Conversation Detal: \n" + str(chat_data['conversationHistory']))
+			del chat_data[chose], data, chat_data['chose'], chat_data['conversationHistory']
 			update.message.reply_text(
 				"Perdona, mi sono rotto un braccio! devo scappare in ospedale :("
 				"\nTi lascio con mio fratello, ma devi ricominciare.",
@@ -183,7 +183,8 @@ def interact(bot, update, chat_data, chose):
 		chat_data['chose'] = data['successorsMap'][getClassName(which_classes[0])]
 		del data, chat_data[chose]
 		return interact(bot, update, chat_data, chat_data['chose'])
-
+	logger.debug("Conversation with :" + update.message.from_user.name)
+	logger.debug(str(chat_data['conversationHistory']))
 	message += "\nCosa vuoi fare?"
 	reply_keyboard = [['Ricomincia', 'Esci'], ]  # ['Valuta la classificazione']]
 	update.message.reply_text(message, reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
