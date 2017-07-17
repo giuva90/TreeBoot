@@ -81,7 +81,7 @@ def interact(bot, update, chat_data, chose):
 		data = deepcopy(treeData[chose])
 		chat_data[chose] = data
 		chat_data['step'] = 1  # 1 = ask question, 0 = process answer
-		if 'conversationHistory' not in data:
+		if 'conversationHistory' not in chat_data:
 			chat_data['conversationHistory'] = {}
 	dt = treeData['dt' + chose]
 
@@ -153,7 +153,7 @@ def interact(bot, update, chat_data, chose):
 				reply_markup=ReplyKeyboardRemove())
 			return ConversationHandler.END
 
-	update.message.reply_text("Ottimo! Ho trovato qualcosa!\n")
+	# update.message.reply_text("Ottimo! Ho trovato qualcosa!\n")
 	message = ""
 	classification = data['a']
 	del classification['solution_path']
@@ -179,7 +179,7 @@ def interact(bot, update, chat_data, chose):
 
 	# handling of connection among tree
 	if 'hasSuccessors' in data:
-		update.message.reply_text("Continuiamo con le domand, vediamo dodve arriviamo...\n")
+		update.message.reply_text("Credo di essere sulla buona strada...\n")
 		chat_data['chose'] = data['successorsMap'][getClassName(which_classes[0])]
 		del data, chat_data[chose]
 		return interact(bot, update, chat_data, chat_data['chose'])
