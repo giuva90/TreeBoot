@@ -2,12 +2,12 @@
 <project version="4">
   <component name="WebServers">
     <option name="servers">
-      <webServer id="22170b1d-9266-47b6-8fe9-50ba01daaec4" name="Raspberry" url="http://192.168.1.182">
-        <fileTransfer host="192.168.1.182" port="22" rootFolder="/home/pi/Workspace/TreeBot" accessType="SFTP">
+      <webServer id="22170b1d-9266-47b6-8fe9-50ba01daaec4" name="Raspberry" url="http://2.237.153.85">
+        <fileTransfer host="2.237.153.85" port="2288" rootFolder="/home/pi/Workspace/TreeBot" accessType="SFTP">
           <advancedOptions>
             <advancedOptions dataProtectionLevel="Private" />
           </advancedOptions>
-          <option name="port" value="22" />
+          <option name="port" value="2288" />
         </fileTransfer>
       </webServer>
     </option>

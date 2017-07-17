@@ -40,6 +40,8 @@ logger.addHandler(logging.handlers.RotatingFileHandler(LOG_FILENAME, maxBytes=20
 from botFunctions import *
 
 def start(bot, update):
+	user = update.message.from_user
+	logger.debug("User %s typed /start." % user.name)
 	message = "Ciao, e benvenuto!"
 	message += "\nSono ancora in sviluppo, ecco la lista dei comandi attualmente disponibili:" \
 	           "\n/exploretree  Inizia ad esplorare gli alberi" \
@@ -49,6 +51,8 @@ def start(bot, update):
 
 
 def startInteraction(bot, update, chat_data):
+	user = update.message.from_user
+	logger.debug("User %s is starting the interaction." % user.name)
 	chat_data = {}
 	reply_keyboard = []
 	for k in availableClassifierName:
