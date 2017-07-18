@@ -54,7 +54,7 @@ def unknown(bot, update):
 
 def cancel(bot, update, chat_data):
 	user = update.message.from_user
-	logger.debug("User %s canceled the conversation." % user.name)
+	logger.debug("User %s cancelled the conversation." % user.name)
 	update.message.reply_text('Ciao, spero di rivederti presto!',
 	                          reply_markup=ReplyKeyboardRemove())
 	for k in availableClassifierName:

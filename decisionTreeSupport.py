@@ -23,10 +23,13 @@ def getClassName(name: str) -> str:
 		return name
 
 
-def getFetureDict(values: list) -> dict:
+def getFetureDict(values: list, mode=1) -> dict:
 	d = {}
 	for v in values:
-		d[re.search(r'(.+)=(.+)', v).group(2)] = re.search(r'(.+)=(.+)', v).group(1)
+		if mode:
+			d[re.search(r'(.+)=(.+)', v).group(2)] = re.search(r'(.+)=(.+)', v).group(1)
+		else:
+			d[re.search(r'(.+)=(.+)', v).group(1)] = re.search(r'(.+)=(.+)', v).group(2)
 	return d
 
 def init(dsname: str, csv_class_column_index: int, csv_columns_for_features: list):
@@ -67,24 +70,28 @@ def init(dsname: str, csv_class_column_index: int, csv_columns_for_features: lis
 
 	with open(interaction_datafile, 'r') as csv_file:
 		# rows = reader(csv_file, delimiter=',')
-		r = [row.strip().split(',') for row in csv_file]
+		r = [row.strip().split(',') for row in csv_file if row[0] != '#']
 		numbers = r[0]
 		del r[0]
 		nQuestions = int(numbers[0])
 		nFeatures = int(numbers[1])
+		if nFeatures < 0:
+			nFeatures *= -1
+			mode = 0
+		else:
+			mode = 1
 		nClasses = int(numbers[2])
 
 		for i in range(len(r)):
-			if r[i][0][0] == "#":
-				continue
-			elif i <= nQuestions + 1:
+
+			if i < nQuestions:
 				data['questions'][r[i][0]] = r[i][1]
-			elif i <= nQuestions + nFeatures + 2:
-				data['featuresHumanization'][r[i][0]] = getFetureDict(r[i][1:])
-			elif i <= nQuestions + nFeatures + nClasses + 3:
+			elif i >= nQuestions and i < nQuestions + nFeatures:
+				data['featuresHumanization'][r[i][0]] = getFetureDict(r[i][1:], mode)
+			elif i >= nQuestions + nFeatures and i < nQuestions + nFeatures + nClasses:
 				data['classHumanization'][r[i][0]] = ",".join(r[i][1:])
 			elif r[i][0] == 'singleAnswer':
-				data['interaction']['singleAnswer'] = ",".join(r[i][1:])
+				data['interaction'][r[i][0]] = ",".join(r[i][1:])
 
 			# # read data for questions
 			# for i in range(nQuestions - 1):
@@ -106,6 +113,10 @@ def init(dsname: str, csv_class_column_index: int, csv_columns_for_features: lis
 			# 		continue
 			# 	data['classHumanization'][r[i][0]] = r[i][1:]
 			# 	r.pop(i)
+
+	if len(data['questions']) == 0:
+		del data['questions']
+
 	del dt
 	return data
 
